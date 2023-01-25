@@ -1,0 +1,64 @@
+<div class="body">
+    <form id="url_bar"><input type="text" placeholder="Enter URL" id="name"></form>
+    <iframe src="https://frozd.dev/zesktop"></iframe>
+</div>
+
+
+<style>
+    .body{
+        height: 500px;
+    }
+
+    body{
+        margin: 0;
+        padding: 0;
+        width: 960;
+        height: 530;
+        background-color: #ffffff;
+    }
+
+    iframe{
+        width: 100%;
+        height: 100%;
+        border: none;
+        background-color: transparent;
+        overflow: hidden;
+    }
+
+    #url_bar input{
+        width: 100%;
+        height: 50px;
+        border: black 1px solid;        
+        border: none;
+        outline: none;
+        background-color: transparent;
+        color: black;        font-size: 20px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    #url_bar input::placeholder{
+        color: rgb(109, 109, 109);
+    }
+</style>
+
+<script>
+    let url_bar = document.getElementById("url_bar");
+    let name = document.getElementById("name");
+    let iframe = document.getElementsByTagName("iframe")[0];
+    url_bar.onsubmit = (e) => {
+        e.preventDefault();
+        iframe.src = `${name.value}`;
+    }
+
+    function matchURL(){
+        let url = iframe.src;
+        //check if name is focused
+        if(name != document.activeElement){
+            name.value = url;
+
+        }
+    }
+
+    setInterval(matchURL, 100);
+    
+</script>

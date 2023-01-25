@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <div class="window login">
+        <img src="logo.png" alt="logo" style="width: 100px; height: 100px;">
+        <div>
+            <input type="text" placeholder="Username"><br>
+            <input type="password" placeholder="Password">
+            <div style="display:flex; justify-content: space-between; width: 100%;">
+                <div></div>
+                <button onclick="login()">Login</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<script>
+
+    function login(){
+        window.location.href = "./desktop.html";
+    }
+
+</script>
+
+
+<style>
+
+    button{
+        background-color: #0F72C2;
+        color:white;
+        outline: none;
+        border: none;
+        width: 100px;
+        height: 35px;
+        margin-top: 10px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    button:hover{
+        background-color: #30BBEC;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    input{
+        outline: none;
+        border: none;
+        border-bottom: 1px solid #0F72C2;
+        width: 300px;
+        height: 25px;
+        margin-top: 10px;
+    }
+
+    input:focus{
+        border-bottom: 1px solid #30BBEC;
+    }
+
+    body{
+        margin:0;
+        background-image: url(bg.jpg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        /*blur the background*/
+        
+        background-color: rgba(0,0,0,0.5); 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
+        
+
+        min-height: 100vh;
+       
+
+
+        
+    }
+
+    .window.login{
+        background-color: rgb(255, 255, 255);
+        padding: 20px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: rgb(0, 0, 0);
+        font-size: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+</style>

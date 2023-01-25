@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z | Desktop</title>
+</head>
+<body>
+    <div class="top_bar">
+        <div class="os_bar">
+            <p>ZesktopCore</p>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:center;">
+            <p id="time">🕛12:55</p>
+            <a href="/zesktop/demo">🚪</a>
+        </div>
+    </div>
+    <div id="desktop" class="desktop">
+    </div>
+    <p style="position:absolute; bottom:5px; right: 15px;">Zesktop Core demo. Limited functionality.</p>
+</body>
+</html>
+
+<script>
+    function updateTime(){
+        let date = new Date();
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        let seconds = date.getSeconds();
+        let time = document.getElementById("time");
+        time.innerHTML = `🕛${hours}:${minutes}:${seconds}`;
+    }
+    setInterval(updateTime, 1000);
+
+    function focusWindow(e){
+        let windows = document.getElementsByClassName("window");
+        for(let i = 0; i < windows.length; i++){
+            windows[i].style.zIndex = i + 1;
+        }
+        e.style.zIndex = windows.length + 1;
+        makeResizableDiv(".window");
+    }
+
+    function dragElement(elmnt) {
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (document.getElementById(elmnt.id + "header")) {
+          // if present, the header is where you move the DIV from:
+          document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+        } else {
+          // otherwise, move the DIV from anywhere inside the DIV:
+          elmnt.onmousedown = dragMouseDown;
+        }
+      
+        function dragMouseDown(e) {
+            
+            focusWindow(elmnt);
+          e = e || window.event;
+          e.preventDefault();
+          // get the mouse cursor position at startup:
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          document.onmouseup = closeDragElement;
+          // call a function whenever the cursor moves:
+          document.onmousemove = elementDrag;
+        }
+      
+        function elementDrag(e) {
+          e = e || window.event;
+          e.preventDefault();
+          // calculate the new cursor position:
+          pos1 = pos3 - e.clientX;
+          pos2 = pos4 - e.clientY;
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          // set the element's new position:
+          elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+          elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+      
+        function closeDragElement() {
+          // stop moving when mouse button is released:
+          document.onmouseup = null;
+          document.onmousemove = null;
+          
+        }
+      }
+
+
+      function updateWindows(){
+        let windows = document.getElementsByClassName("window");
+        for(let i = 0; i < windows.length; i++){
+            dragElement(windows[i]);
+        }
+        
+
+      }
+      
+      setInterval(updateWindows, 1000);
+
+      function closeWIndow(e){
+        e.parentElement.remove();
+        let os_bar = document.getElementsByClassName("os_bar")[0];
+        let open_apps = os_bar.children;
+        for(let i = 0; i < open_apps.length; i++){
+            console.log(open_apps[i].id.split("_")[0])
+            console.log(e.id.split("_")[0]);
+            if(open_apps[i].id.split("_")[0].replace("header","") == e.id.split("_")[0].replace("header","") ){
+                open_apps[i].remove();
+            }
+        }
+
+      }
+
+      
+      async function registerApps(){
+        //read apps.json
+        //register apps
+        let apps = await fetch("./apps.json")
+        .then(res => res.json())
+        console.log(apps);
+        for(let i = 0; i<apps.length; i++){
+            let app = apps[i];
+            let button = document.createElement("button");
+            button.innerHTML = `<img src="./apps/${app.name}/icon.png">${app.label}`;
+            button.onclick = () => {
+                let os_bar = document.getElementsByClassName("os_bar")[0];
+                let open_apps = os_bar.children;
+                //check if the app is already open
+                
+                for(let i = 0; i < open_apps.length; i++){
+                    if(open_apps[i].id == `${app.name}_icon`){
+                        return("app already open");
+                    }
+                }
+                let window = document.createElement("div");
+                window.className = "window";
+                window.innerHTML = `<div class="window_top_bar"><p>${app.name}</p></div>    <div class='resizer top-left'></div>
+                <div class='resizer top-right'></div>
+                <div class='resizer bottom-left'></div>
+                <div class='resizer bottom-right'></div>`;
+                let window_top_bar = window.getElementsByClassName("window_top_bar")[window.getElementsByClassName("window_top_bar").length - 1];
+                window_top_bar.id = `${app.name}header`;
+                let window_controls = document.createElement("div");
+                window_controls.className = "window_controls";
+                window_controls.innerHTML = `<button class="window_close" onclick="closeWIndow(this.parentElement.parentElement)"><img src="./icons/close.svg"></button>`;
+                window_top_bar.appendChild(window_controls);
+
+                window.style.transition = "all 0.2s ease-in-out";
+                window.style.transform = "scale(0.5)";
+                setTimeout(() => {
+                    window.style.transform = "scale(1)";
+                }, 100);
+                window.style.opacity = "0";
+                setTimeout(() => {
+                    window.style.opacity = "1";
+                }, 100);
+                window.style.transition = "none";
+                window.id = `${app.name}_window`;
+                window.innerHTML += `<iframe onload="resizeIframe(this)" src="./apps/${app.name}/index.html" style="width: 100%; height: 100%; border: none; background-color: transparent; overflow: hidden;"></iframe>`;
+                document.body.appendChild(window);
+                dragElement(window);
+                
+                
+                let icon = document.createElement("button");
+                icon.innerHTML = `<img src="./apps/${app.name}/icon.png">`;
+                icon.onclick = () => {
+                    focusWindow(window);
+                }
+                icon.id = `${app.name}_icon`;
+                os_bar.insertBefore(icon, open_apps[open_apps.length]);
+
+                
+            }
+            document.getElementById("desktop").appendChild(button);
+
+        }
+      }
+
+      registerApps();
+
+      function resizeIframe(iframe) {
+        var container = iframe.parentNode;
+        container.style.height = iframe.contentWindow.document.body.scrollHeight + "px";
+        container.style.width = iframe.contentWindow.document.body.scrollWidth + "px";
+      }
+
+      function makeResizableDiv(div) {
+        const element = document.querySelector(div);
+        const resizers = document.querySelectorAll(div + ' .resizer')
+        const minimum_size = 20;
+        let original_width = 0;
+        let original_height = 0;
+        let original_x = 0;
+        let original_y = 0;
+        let original_mouse_x = 0;
+        let original_mouse_y = 0;
+        for (let i = 0;i < resizers.length; i++) {
+          const currentResizer = resizers[i];
+          currentResizer.addEventListener('mousedown', function(e) {
+            e.preventDefault()
+            original_width = parseFloat(getComputedStyle(element, null).getPropertyValue('width').replace('px', ''));
+            original_height = parseFloat(getComputedStyle(element, null).getPropertyValue('height').replace('px', ''));
+            original_x = element.getBoundingClientRect().left;
+            original_y = element.getBoundingClientRect().top;
+            original_mouse_x = e.pageX;
+            original_mouse_y = e.pageY;
+            window.addEventListener('mousemove', resize)
+            window.addEventListener('mouseup', stopResize)
+          })
+          
+          function resize(e) {
+            if (currentResizer.classList.contains('bottom-right')) {
+              const width = original_width + (e.pageX - original_mouse_x);
+              const height = original_height + (e.pageY - original_mouse_y)
+              if (width > minimum_size) {
+                element.style.width = width + 'px'
+              }
+              if (height > minimum_size) {
+                element.style.height = height + 'px'
+              }
+            }
+            else if (currentResizer.classList.contains('bottom-left')) {
+              const height = original_height + (e.pageY - original_mouse_y)
+              const width = original_width - (e.pageX - original_mouse_x)
+              if (height > minimum_size) {
+                element.style.height = height + 'px'
+              }
+              if (width > minimum_size) {
+                element.style.width = width + 'px'
+                element.style.left = original_x + (e.pageX - original_mouse_x) + 'px'
+              }
+            }
+            else if (currentResizer.classList.contains('top-right')) {
+              const width = original_width + (e.pageX - original_mouse_x)
+              const height = original_height - (e.pageY - original_mouse_y)
+              if (width > minimum_size) {
+                element.style.width = width + 'px'
+              }
+              if (height > minimum_size) {
+                element.style.height = height + 'px'
+                element.style.top = original_y + (e.pageY - original_mouse_y) + 'px'
+              }
+            }
+            else {
+              const width = original_width - (e.pageX - original_mouse_x)
+              const height = original_height - (e.pageY - original_mouse_y)
+              if (width > minimum_size) {
+                element.style.width = width + 'px'
+                element.style.left = original_x + (e.pageX - original_mouse_x) + 'px'
+              }
+              if (height > minimum_size) {
+                element.style.height = height + 'px'
+                element.style.top = original_y + (e.pageY - original_mouse_y) + 'px'
+              }
+            }
+          }
+          
+          function stopResize() {
+            window.removeEventListener('mousemove', resize)
+          }
+        }
+      }
+
+      if(window.innerWidth < 800){
+        alert("Your screen is too small to run this OS. Please use a larger screen.");
+        window.location.href = "https://frozd.dev/zesktop";
+      }
+</script>
+
+<style>
+    #time{
+        width: 100px;
+    }
+
+    .window_controls{
+        display: flex;
+        height: 100%;
+        align-items: center;
+        column-gap: 10px;
+        align-items: center;
+        width: 20px;
+
+    }
+
+    .window_close{
+        background-color: transparent;
+        border: none;
+        color: white;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+
+    }
+
+    .window_close:hover{
+        background-color: rgba(255,255,255,0.2);
+    }
+
+    .window_close img{
+        width: 20px;
+        height: 20px;
+    }
+
+    .os_bar{
+        display: flex;
+        height: 35px;
+        align-items: center;
+        column-gap: 10px;
+    }
+    .os_bar button{
+        background-color: transparent;
+        border: none;
+        color: white;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .os_bar button:hover{
+        background-color: rgba(255,255,255,0.2);
+    }
+
+    .os_bar button img{
+        width: 20px;
+        height: 20px;
+    }
+
+    .top_bar{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        box-sizing: border-box;
+        height: 35px;
+        background-color: #0F72C2;
+        color:white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        z-index: 999;
+    }
+
+    body{
+        margin:0;
+        background-image: url(bg.jpg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: rgba(0,0,0,0.5); 
+        display: flex;
+        height: 100vh;
+        box-sizing: border-box;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    .desktop{
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        height: 100%;
+        padding-top: 30px;
+    }
+
+    .desktop button{
+        background-color: transparent;
+        border: none;
+        outline: none;
+        width: 80px;
+        height: 80px;
+        transition: all 0.3s ease-in-out;
+        color: white;
+    }
+
+    .desktop button:hover{
+        cursor: pointer;
+    }
+
+    .desktop button img{
+        padding-top: 20px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .window{
+        
+        background-color: white;
+        min-width: 100px;
+        min-height: 100px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
+        display: flex;
+        position: absolute;
+        padding:0;
+        padding-top: 30px;
+        height: max-content;
+        width: max-content;
+        resize: both;
+        top: 40px;
+        left: 40px;
+    }
+
+    .window_top_bar{
+        position: absolute;
+        top:0;
+        left:0;
+        width: calc(100% - 20px);
+        height: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #0F72C2;
+        border-radius: 10px 10px 0 0;
+        color: white;
+        padding: 0 10px;
+    }
+
+    .window_top_bar div{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 50px;
+    }
+
+    a:hover{
+        cursor: pointer;
+    }
+
+
+
+    .resizable {
+        background: white;
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        top: 100px;
+        left: 100px;
+      }
+      
+      .resizable .resizers{
+        width: 100%;
+        height: 100%;
+        border: 3px solid #4286f4;
+        box-sizing: border-box;
+      }
+      
+      .resizable .resizers .resizer{
+        width: 10px;
+        height: 10px;
+        border-radius: 50%; /*magic to turn square into circle*/
+        background: white;
+        border: 3px solid #4286f4;
+        position: absolute;
+      }
+      
+ .resizer.top-left {
+        left: -5px;
+        top: -5px;
+        cursor: nwse-resize; /*resizer cursor*/
+        z-index: 999;
+      }
+ .resizer.top-right {
+        right: -5px;
+        top: -5px;
+        cursor: nesw-resize;
+      }
+ .resizer.bottom-left {
+        left: -5px;
+        bottom: -5px;
+        cursor: nesw-resize;
+      }
+ .resizer.bottom-right {
+        right: -5px;
+        bottom: -5px;
+        cursor: nwse-resize;
+      }
+</style>

@@ -1,0 +1,27 @@
+[
+    {
+        "id": "1",
+        "name": "chrome",
+        "label": "Chrome"
+    },
+    {
+        "id": "2",
+        "name": "sample",
+        "label": "Sample"
+    },
+    {
+        "id": "3",
+        "name": "help",
+        "label": "Help"
+    },
+    {
+        "id":"4",
+        "name":"changelog",
+        "label":"Changelog"
+    },
+    {
+        "id":"5",
+        "name":"about",
+        "label":"About"
+    }
+]
