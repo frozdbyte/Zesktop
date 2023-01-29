@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fake File System</title>
+    <style>
+        html{
+            width: 800px;
+            height: 800px;
+            overflow-x: hidden;
+        }
+
+
+        /* General styling for the file system container */
+        #file-system {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            justify-content: center;
+            row-gap: 4px;
+        }
+
+        .folder{
+            width: 100%;
+            height: 50px;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            padding: 5px 20px;
+            column-gap: 10px;
+        }
+
+        .file{
+            width: 100%;
+            height: 50px;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            padding: 5px 20px ;
+            column-gap: 10px;
+        }
+
+    </style>
+  </head>
+  <body>
+    <div id="file-system">
+      <!-- File system structure will be created here -->
+    </div>
+
+    <script>
+      // JavaScript for creating the file system structure
+
+        let fileSystem = [
+        ]
+
+        let global_path = '/'
+
+
+
+        async function cd(path){
+            clearFileSystem()
+            let fetchedsystem;
+            if(path == '/'){
+                fetchedsystem = await fetch('/files/folder')
+                global_path = '/'
+            }else if(path === ".."){
+                console.log("GLOBAL")
+                console.log(global_path);
+                global_path = global_path.split('/').slice(0, -1).join('/')
+                console.log(global_path);
+                fetchedsystem = await fetch('/files/' + global_path + '/folder')
+                
+            }else if(!path.split('.')[1]){
+                fetchedsystem = await fetch('/files/' + global_path + "/" + path + '/folder')
+                global_path = global_path + "/" + path
+            }
+            else{
+                fetchedsystem = await fetch('/files/' + path)
+                global_path = global_path + "/" + path
+            }
+            fetchedsystem = await fetchedsystem.json()
+            for(let i = 0; i < fetchedsystem.length; i++){
+                console.log(fetchedsystem[i]);
+                if(!fetchedsystem[i].split('.')[1]){
+                    fileSystem.push({
+                        type: "folder",
+                        name: fetchedsystem[i],
+                        files: []
+                    })
+                }else{
+                    fileSystem.push({
+                        type: "file",
+                        name: fetchedsystem[i],
+                        files: []
+                    })
+                }
+            }
+            
+            createFileSystem()
+        }
+
+        function createFileEntry(type, name){
+            if(type === "folder"){
+                const folder = document.createElement("div")
+                folder.classList.add("folder")
+                const folderIcon = document.createElement("img")
+                folderIcon.src = "https://img.icons8.com/ios/50/000000/folder-invoices.png"
+                folderIcon.style.width = "30px"
+                folderIcon.style.height = "30px"
+                folder.appendChild(folderIcon)
+                const folderTitle = document.createElement("p")
+                folderTitle.innerText = name
+                folder.appendChild(folderTitle)
+                folder.onclick = function(){
+                    cd(name)
+                }
+                return folder
+            }
+            if(type === "file"){
+                const file = document.createElement("div")
+                file.classList.add("file")
+                const fileIcon = document.createElement("img")
+                fileIcon.src = "https://img.icons8.com/ios/50/000000/file.png"
+                fileIcon.style.width = "30px"
+                fileIcon.style.height = "30px"
+                file.appendChild(fileIcon)
+                const fileName = document.createElement("p")
+                fileName.innerText = name
+                file.appendChild(fileName)
+                return file
+            }
+            if(type === "back"){
+                const back = document.createElement("div")
+                back.classList.add("folder")
+                const backIcon = document.createElement("img")
+                backIcon.src = "https://img.icons8.com/ios/50/000000/back.png"
+                backIcon.style.width = "30px"
+                backIcon.style.height = "30px"
+                back.appendChild(backIcon)
+                const backTitle = document.createElement("p")
+                backTitle.innerText = name
+                back.appendChild(backTitle)
+                back.onclick = function(){
+                    cd("..")
+                }
+                return back
+            }
+            else{
+                return null
+            }
+        }
+
+        function createFileSystem(toplevel = false){
+            const fileSystemContainer = document.getElementById("file-system")
+            console.log(fileSystem);
+            if(!toplevel){
+                const fileEntry = createFileEntry("back", "..")
+                fileSystemContainer.appendChild(fileEntry)
+            }
+            for(let i = 0; i < fileSystem.length; i++){
+                const fileEntry = createFileEntry(fileSystem[i].type, fileSystem[i].name)
+                fileSystemContainer.appendChild(fileEntry)
+            }
+        }
+
+        function clearFileSystem(){
+            const fileSystemContainer = document.getElementById("file-system")
+            fileSystemContainer.innerHTML = ""
+            fileSystem = []
+        }
+
+        cd('/')
+
+    </script>
+  </body>
+</html>

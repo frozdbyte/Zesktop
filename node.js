@@ -2,6 +2,9 @@ let express = require('express');
 let app = express();
 let http = require('http').Server(app);
 let https = require('https');
+let filewall = require('./scripts/file-wall.js');
+
+
 
 app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
@@ -35,15 +38,10 @@ app.get('/app/:name/:file/:file2/:file3', function(req, res){
     }
 );
 
-app.get('/assets/:file', function(req, res){
-    res.sendFile(__dirname + '/assets/' + req.params.file);
-    }
-);
+app.use("/assets", express.static('assets'));
 
-app.get('/assets/:file/:file2', function(req, res){
-    res.sendFile(__dirname + '/assets/' + req.params.file + '/' + req.params.file2);
-    }
-);
+app.use(filewall).use("/files", express.static('files'));
+
 
 
 //start server

@@ -23,5 +23,10 @@
         "id":"5",
         "name":"about",
         "label":"About"
+    },
+    {
+        "id":"6",
+        "name":"internal",
+        "label":"Intranet"
     }
 ]
