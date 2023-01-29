@@ -12,8 +12,17 @@
             <p>ZesktopCore</p>
         </div>
         <div style="display:flex; align-items:center; justify-content:center;">
-            <p id="time">🕛12:55</p>
-            <a href="/zesktop/demo">🚪</a>
+            <p id="time">🕛0:00:0</p>
+            <div style="height:100%; display:flex; align-items:center; justify-content:center;">
+                <img title="Battery at 73% - around 3 hours remaining" style="width: 30px;" src="/assets/icons/battery.svg">
+            <a onclick="toggleUserMenu()"><img style="width: 30px;" src="/assets/icons/user.svg"></a>
+            <div id="usermenu">
+              <ul>
+                <li><a href="/logout">Logout</a></li>
+                <li><a href="">Test Item</a></li>
+              </ul>
+            </div>
+            </div>
         </div>
     </div>
     <div id="desktop" class="desktop">
@@ -116,13 +125,13 @@
       async function registerApps(){
         //read apps.json
         //register apps
-        let apps = await fetch("./apps.json")
+        let apps = await fetch("/apps")
         .then(res => res.json())
         console.log(apps);
         for(let i = 0; i<apps.length; i++){
             let app = apps[i];
             let button = document.createElement("button");
-            button.innerHTML = `<img src="./apps/${app.name}/icon.png">${app.label}`;
+            button.innerHTML = `<img src="/app/${app.name}/icon.png">${app.label}`;
             button.onclick = () => {
                 let os_bar = document.getElementsByClassName("os_bar")[0];
                 let open_apps = os_bar.children;
@@ -143,7 +152,7 @@
                 window_top_bar.id = `${app.name}header`;
                 let window_controls = document.createElement("div");
                 window_controls.className = "window_controls";
-                window_controls.innerHTML = `<button class="window_close" onclick="closeWIndow(this.parentElement.parentElement)"><img src="./icons/close.svg"></button>`;
+                window_controls.innerHTML = `<button class="window_close" onclick="closeWIndow(this.parentElement.parentElement)"><img src="/assets/icons/close.svg"></button>`;
                 window_top_bar.appendChild(window_controls);
 
                 window.style.transition = "all 0.2s ease-in-out";
@@ -157,13 +166,13 @@
                 }, 100);
                 window.style.transition = "none";
                 window.id = `${app.name}_window`;
-                window.innerHTML += `<iframe onload="resizeIframe(this)" src="./apps/${app.name}/index.html" style="width: 100%; height: 100%; border: none; background-color: transparent; overflow: hidden;"></iframe>`;
+                window.innerHTML += `<iframe onload="resizeIframe(this)" src="/app/${app.name}/index.html" style="width: 100%; height: 100%; border: none; background-color: transparent; overflow: hidden;"></iframe>`;
                 document.body.appendChild(window);
                 dragElement(window);
                 
                 
                 let icon = document.createElement("button");
-                icon.innerHTML = `<img src="./apps/${app.name}/icon.png">`;
+                icon.innerHTML = `<img src="/app/${app.name}/icon.png">`;
                 icon.onclick = () => {
                     focusWindow(window);
                 }
@@ -183,6 +192,15 @@
         var container = iframe.parentNode;
         container.style.height = iframe.contentWindow.document.body.scrollHeight + "px";
         container.style.width = iframe.contentWindow.document.body.scrollWidth + "px";
+      }
+
+      function toggleUserMenu(){
+        let user_menu = document.getElementById("usermenu");
+        if(user_menu.style.display == "block"){
+            user_menu.style.display = "none";
+        }else{
+            user_menu.style.display = "block";
+        }
       }
 
       function makeResizableDiv(div) {
@@ -273,6 +291,45 @@
         width: 100px;
     }
 
+    #usermenu{
+        position: absolute;
+        right: 10px;
+        top: 35px;
+        background-color: #1e1e1e;
+        display: none;
+    }
+
+    #usermenu ul{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        
+    }
+
+    #usermenu ul li{
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #ffffff;
+    }
+
+    #usermenu ul li:last-child{
+        border-bottom: none;
+    }
+
+    #usermenu ul li:hover{
+        background-color: #ffffff;
+        color: #1e1e1e;
+    }
+
+    #usermenu ul li:hover a{
+        color: #1e1e1e;
+    }
+
+    #usermenu ul li a{
+      color:white;
+        text-decoration: none;
+    }
+
     .window_controls{
         display: flex;
         height: 100%;
@@ -347,7 +404,7 @@
 
     body{
         margin:0;
-        background-image: url(bg.jpg);
+        background-image: url(/assets/bg.jpg);
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
