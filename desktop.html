@@ -27,11 +27,18 @@
     </div>
     <div id="desktop" class="desktop">
     </div>
-    <p style="position:absolute; bottom:5px; right: 15px;">Zesktop Core demo. Limited functionality.</p>
+    <div id="context-menu">
+      <ul>
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="">Test Item</a></li>
+      </ul>
+    </div>
+    <p style="position:absolute; bottom:5px; right: 15px;">Zesktop Core demo. Limited functionality. v300123</p>
 </body>
 </html>
 
 <script>
+    let isHoveringOsBar = false;
     function updateTime(){
         let date = new Date();
         let hours = date.getHours();
@@ -107,8 +114,8 @@
       
       setInterval(updateWindows, 1000);
 
-      function closeWIndow(e){
-        e.parentElement.remove();
+      function closeWindow(e){
+        e.remove();
         let os_bar = document.getElementsByClassName("os_bar")[0];
         let open_apps = os_bar.children;
         for(let i = 0; i < open_apps.length; i++){
@@ -119,6 +126,16 @@
             }
         }
 
+      }
+
+      function closeWindowByIcon(e){
+        let windows = document.getElementsByClassName("window");
+        for(let i = 0; i < windows.length; i++){
+            if(windows[i].id.split("_")[0] == e.id.split("_")[0]){
+                windows[i].remove();
+            }
+        }
+        e.remove();
       }
 
       
@@ -152,7 +169,7 @@
                 window_top_bar.id = `${app.name}header`;
                 let window_controls = document.createElement("div");
                 window_controls.className = "window_controls";
-                window_controls.innerHTML = `<button class="window_close" onclick="closeWIndow(this.parentElement.parentElement)"><img src="/assets/icons/close.svg"></button>`;
+                window_controls.innerHTML = `<button class="window_close" onclick="closeWindow(this.parentElement.parentElement.parentElement)"><img src="/assets/icons/close.svg"></button>`;
                 window_top_bar.appendChild(window_controls);
 
                 window.style.transition = "all 0.2s ease-in-out";
@@ -175,6 +192,12 @@
                 icon.innerHTML = `<img src="/app/${app.name}/icon.png">`;
                 icon.onclick = () => {
                     focusWindow(window);
+                }
+                icon.onmouseenter = () => {
+                    isHoveringOsBar = window;
+                }
+                icon.onmouseleave = () => {
+                    isHoveringOsBar = false;
                 }
                 icon.id = `${app.name}_icon`;
                 os_bar.insertBefore(icon, open_apps[open_apps.length]);
@@ -284,9 +307,52 @@
         alert("Your screen is too small to run this OS. Please use a larger screen.");
         window.location.href = "https://frozd.dev/zesktop";
       }
+
+      if (document.addEventListener) {
+        document.addEventListener('contextmenu', function(e) {
+          const menu = document.getElementById("context-menu");
+          menu.style.display = "block";
+          menu.style.left = e.pageX + "px";
+          menu.style.top = e.pageY + "px";
+          if(isHoveringOsBar) {
+            let currentClicked = isHoveringOsBar;
+            console.log(currentClicked)
+            
+            let newElement = document.createElement("li");
+            let newLink = document.createElement("a");
+            newLink.innerHTML = "Close Window";
+            newLink.onclick = () => {
+              console.log(currentClicked)
+              closeWindow(currentClicked)
+            };
+            newElement.append(newLink);
+            newElement.id = "close-window";
+            menu.children[0].appendChild(newElement);
+          }
+          e.preventDefault();
+          document.addEventListener("click", function(){
+            menu.style.display = "none";
+            if(document.getElementById("close-window")){
+              document.getElementById("close-window").remove();
+            }
+            removeEventListener("click", arguments.callee, false);
+          }, false);
+        }, false);
+      } else {
+        document.attachEvent('oncontextmenu', function() {
+          alert("You've tried to open context menu");
+          window.event.returnValue = false;
+        });
+      }
+
 </script>
 
 <style>
+    :root{
+      --default-cursor: url(https://i.imgur.com/a3piAm2.png), auto;
+      --pointer-cursor: url(https://i.imgur.com/SJ5EbOW.png), auto;
+    }
+  
     #time{
         width: 100px;
     }
@@ -308,7 +374,7 @@
 
     #usermenu ul li{
         padding: 10px;
-        cursor: pointer;
+        cursor: var(--pointer-cursor);
         border-bottom: 1px solid #ffffff;
     }
 
@@ -330,6 +396,44 @@
         text-decoration: none;
     }
 
+    #context-menu{
+        position: absolute;
+        background-color: #1e1e1e;
+        display: none;
+        z-index: 9999;
+    }
+
+    #context-menu ul{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        
+    }
+
+    #context-menu ul li{
+        padding: 10px;
+        cursor: var(--pointer-cursor);
+        border-bottom: 1px solid #ffffff;
+    }
+
+    #context-menu ul li:last-child{
+        border-bottom: none;
+    }
+
+    #context-menu ul li:hover{
+        background-color: #ffffff;
+        color: #1e1e1e;
+    }
+
+    #context-menu ul li:hover a{
+        color: #1e1e1e;
+    }
+
+    #context-menu ul li a{
+      color:white;
+        text-decoration: none;
+    }
+
     .window_controls{
         display: flex;
         height: 100%;
@@ -347,7 +451,7 @@
         height: 100%;
         display: flex;
         align-items: center;
-        cursor: pointer;
+        cursor: var(--pointer-cursor);
 
     }
 
@@ -374,7 +478,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
+        cursor: var(--pointer-cursor);
     }
 
     .os_bar button:hover{
@@ -414,6 +518,11 @@
         box-sizing: border-box;
         overflow: hidden;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        
+    }
+
+    body:hover{
+      cursor:var(--default-cursor);
     }
 
     .desktop{
@@ -435,7 +544,7 @@
     }
 
     .desktop button:hover{
-        cursor: pointer;
+        cursor: var(--pointer-cursor);
     }
 
     .desktop button img{
@@ -485,7 +594,7 @@
     }
 
     a:hover{
-        cursor: pointer;
+        cursor: var(--pointer-cursor);
     }
 
 
