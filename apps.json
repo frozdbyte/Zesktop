@@ -1,14 +1,10 @@
 [
     {
         "id": "1",
-        "name": "chrome",
-        "label": "Chrome"
+        "name": "browser",
+        "label": "Browser"
     },
-    {
-        "id": "2",
-        "name": "sample",
-        "label": "Sample"
-    },
+
     {
         "id": "3",
         "name": "help",
@@ -26,7 +22,7 @@
     },
     {
         "id":"6",
-        "name":"internal",
-        "label":"Intranet"
+        "name":"files",
+        "label":"Explorer"
     }
 ]

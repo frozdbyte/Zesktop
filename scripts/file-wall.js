@@ -16,12 +16,14 @@ module.exports = async (req, res, next) => {
     //try to get .pw file from the same directory
     let checked_path = [];
     let deny_access = false;
+    console.log(router);
     for(let i = 0; i < router.length; i++){
         if(checked_path.length != router.length - 1){
             console.log(router[i]);
             checked_path.push(router[i]);
-            let pw_file = path.join(__dirname + "/.." + checked_path.join('/') + '.pw');
-            let pw_ignore_file = path.join(__dirname + "/.." + checked_path.join('/') + '.pw.ignore');
+            let pw_file = path.join(__dirname + "/.." + checked_path.join('/') + '/.pw');
+            console.log(pw_file);
+            let pw_ignore_file = path.join(__dirname + "/.." + checked_path.join('/') + '/.pw.ignore');
             if(await fs.existsSync(pw_file)){
                 //check password
                 let pw = fs.readFileSync(pw_file, 'utf8');
@@ -37,11 +39,11 @@ module.exports = async (req, res, next) => {
                     //password is incorrect
                     console.log("incorrect password");
                     deny_access = true;
-                    return;
                 }
             }
         }else{
             if(file === "folder" && deny_access == false){
+                console.log("folder request");
                 let files = fs.readdirSync(path.join(__dirname + "/.." + checked_path.join('/')));
                 let file_list = [];
                 for(let i = 0; i < files.length; i++){

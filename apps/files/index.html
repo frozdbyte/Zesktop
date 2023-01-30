@@ -69,6 +69,7 @@
                 console.log(global_path);
                 fetchedsystem = await fetch('/files/' + global_path + '/folder')
                 
+                
             }else if(!path.split('.')[1]){
                 fetchedsystem = await fetch('/files/' + global_path + "/" + path + '/folder')
                 global_path = global_path + "/" + path
@@ -76,6 +77,11 @@
             else{
                 fetchedsystem = await fetch('/files/' + path)
                 global_path = global_path + "/" + path
+            }
+            if(fetchedsystem.status != 200){
+                alert("Error: You are not allowed to access this folder!")
+                cd('..')
+                return
             }
             fetchedsystem = await fetchedsystem.json()
             for(let i = 0; i < fetchedsystem.length; i++){
