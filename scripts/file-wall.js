@@ -44,7 +44,7 @@ module.exports = async (req, res, next) => {
         }else{
             if(file === "folder" && deny_access == false){
                 console.log("folder request");
-                let files = fs.readdirSync(path.join(__dirname + "/.." + checked_path.join('/')));
+                let files = fs.readdirSync(path.join(__dirname + "/../files" + checked_path.join('/')));
                 let file_list = [];
                 for(let i = 0; i < files.length; i++){
                     if(files[i].split('.')[1] != "pw" && files[i].split('.')[1] != "pw.ignore"){
@@ -55,7 +55,7 @@ module.exports = async (req, res, next) => {
                 return;
             }
             console.log(router[i]);
-            let pw_file = path.join(__dirname + "/.." + checked_path.join('/') + "/" + file.split(".")[0] + '.pw');
+            let pw_file = path.join(__dirname + "/../files" + checked_path.join('/') + "/" + file.split(".")[0] + '.pw');
             console.log(pw_file);
 
             if(await fs.existsSync(pw_file)){

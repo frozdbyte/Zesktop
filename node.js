@@ -3,6 +3,7 @@ let app = express();
 let http = require('http').Server(app);
 let https = require('https');
 let filewall = require('./scripts/file-wall.js');
+let appwall = require('./scripts/app-wall.js');
 
 
 
@@ -20,27 +21,13 @@ app.get('/apps', function(req, res){
     res.sendFile(__dirname + '/apps.json');
     });
 
-app.get('/app/:name', function(req, res){
-    res.sendFile(__dirname + '/apps/' + req.params.name);
-    });
 
-app.get('/app/:name/:file', function(req, res){
-    res.sendFile(__dirname + '/apps/' + req.params.name + '/' + req.params.file);
-    });
-
-app.get('/app/:name/:file/:file2', function(req, res){
-    res.sendFile(__dirname + '/apps/' + req.params.name + '/' + req.params.file + '/' + req.params.file2);
-    }
-);
-
-app.get('/app/:name/:file/:file2/:file3', function(req, res){
-    res.sendFile(__dirname + '/apps/' + req.params.name + '/' + req.params.file + '/' + req.params.file2 + '/' + req.params.file3);
-    }
-);
 
 app.use("/assets", express.static('assets'));
 
-app.use(filewall).use("/files", express.static('files'));
+app.use("/files", filewall, express.static('files'));
+
+app.use("/app", express.static('apps'));
 
 
 

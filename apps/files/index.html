@@ -59,7 +59,8 @@
         async function cd(path){
             clearFileSystem()
             let fetchedsystem;
-            if(path == '/'){
+            console.log(path);
+            if(path === '/'){
                 fetchedsystem = await fetch('/files/folder')
                 global_path = '/'
             }else if(path === ".."){
