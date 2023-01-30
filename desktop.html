@@ -12,7 +12,7 @@
             <p>ZesktopCore</p>
         </div>
         <div style="display:flex; align-items:center; justify-content:center;">
-            <p id="time">🕛0:00:0</p>
+            <p id="time">🕛00:00:00</p>
             <div style="height:100%; display:flex; align-items:center; justify-content:center;">
                 <img title="Battery at 73% - around 3 hours remaining" style="width: 30px;" src="/assets/icons/battery.svg">
             <a onclick="toggleUserMenu()"><img style="width: 30px;" src="/assets/icons/user.svg"></a>
@@ -39,16 +39,32 @@
 
 <script>
     let isHoveringOsBar = false;
+
+    /**
+      * Updates the time in the top right corner
+      */
     function updateTime(){
         let date = new Date();
         let hours = date.getHours();
         let minutes = date.getMinutes();
         let seconds = date.getSeconds();
         let time = document.getElementById("time");
+        if(hours < 10){
+            hours = "0" + hours;
+        }
+        if(minutes < 10){
+            minutes = "0" + minutes;
+        }
+        if(seconds < 10){
+            seconds = "0" + seconds;
+        }
         time.innerHTML = `🕛${hours}:${minutes}:${seconds}`;
     }
-    setInterval(updateTime, 1000);
 
+    /**
+      * focuses a window
+      * @param {HTMLElement} e The window to focus
+      */
     function focusWindow(e){
         let windows = document.getElementsByClassName("window");
         for(let i = 0; i < windows.length; i++){
@@ -58,6 +74,10 @@
         makeResizableDiv(".window");
     }
 
+    /**
+     * Make the DIV element draggable
+     * @param {string} element
+     */
     function dragElement(elmnt) {
         var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         if (document.getElementById(elmnt.id + "header")) {
@@ -102,18 +122,22 @@
         }
       }
 
-
+      /**
+        * Makes sure all windows are functioning properly at all times
+        */
       function updateWindows(){
         let windows = document.getElementsByClassName("window");
+
         for(let i = 0; i < windows.length; i++){
             dragElement(windows[i]);
         }
-        
-
       }
       
-      setInterval(updateWindows, 1000);
-
+      
+      /**
+        * Closes the window and the icon from the os bar
+        * @param {HTMLElement} e The window to close
+        */
       function closeWindow(e){
         e.remove();
         let os_bar = document.getElementsByClassName("os_bar")[0];
@@ -128,6 +152,10 @@
 
       }
 
+      /**
+        * Removes the window and the icon from the os bar
+        * @param {HTMLElement} e The icon of the window to close
+        */
       function closeWindowByIcon(e){
         let windows = document.getElementsByClassName("window");
         for(let i = 0; i < windows.length; i++){
@@ -138,7 +166,9 @@
         e.remove();
       }
 
-      
+      /**
+        * registers all apps from the apps.json file
+        */
       async function registerApps(){
         //read apps.json
         //register apps
@@ -209,14 +239,20 @@
         }
       }
 
-      registerApps();
-
+      
+      /**
+        * Makes sure that a windows size is dependent on the size of the iframe
+        * @param {HTMLElement} iframe The iframe to resize
+        */
       function resizeIframe(iframe) {
         var container = iframe.parentNode;
         container.style.height = iframe.contentWindow.document.body.scrollHeight + "px";
         container.style.width = iframe.contentWindow.document.body.scrollWidth + "px";
       }
 
+      /**
+        * Toggle the user menu
+        */
       function toggleUserMenu(){
         let user_menu = document.getElementById("usermenu");
         if(user_menu.style.display == "block"){
@@ -226,6 +262,11 @@
         }
       }
 
+
+      /**
+        * Makes the window draggable
+        * @param {HTMLElement} elmnt The window to make draggable
+        */
       function makeResizableDiv(div) {
         const element = document.querySelector(div);
         const resizers = document.querySelectorAll(div + ' .resizer')
@@ -303,52 +344,69 @@
         }
       }
 
-      if(window.innerWidth < 800){
-        alert("Your screen is too small to run this OS. Please use a larger screen.");
-        window.location.href = "https://frozd.dev/zesktop";
+      /**
+        * Checks if the screen is supported
+        */
+      function checkScreenWidthSupported(){
+        if(window.innerWidth < 800){
+          alert("Your screen is too small to run this OS. Please use a larger screen.");
+          window.location.href = "https://frozd.dev/zesktop";
+        }
+      }
+    
+      
+      /**
+        * Sets up the context menu
+        */
+      function contextMenuSetup() {
+        if (document.addEventListener) {
+          document.addEventListener('contextmenu', function(e) {
+            const menu = document.getElementById("context-menu");
+            menu.style.display = "block";
+            menu.style.left = e.pageX + "px";
+            menu.style.top = e.pageY + "px";
+            if(isHoveringOsBar) {
+              let currentClicked = isHoveringOsBar;
+              console.log(currentClicked)
+              newLink.onclick = () => { closeWindow(currentClicked); };
+              newElement.append(newLink);
+              newElement.id = "close-window";
+              menu.children[0].appendChild(newElement);
+            }
+            e.preventDefault();
+            document.addEventListener("click", function(){
+              menu.style.display = "none";
+              if(document.getElementById("close-window")){
+                document.getElementById("close-window").remove();
+              }
+              removeEventListener("click", arguments.callee, false);
+            }, false);
+          }, false);
+        } else {
+          document.attachEvent('oncontextmenu', function() {
+            alert("You've tried to open context menu");
+            window.event.returnValue = false;
+          });
+        }
       }
 
-      if (document.addEventListener) {
-        document.addEventListener('contextmenu', function(e) {
-          const menu = document.getElementById("context-menu");
-          menu.style.display = "block";
-          menu.style.left = e.pageX + "px";
-          menu.style.top = e.pageY + "px";
-          if(isHoveringOsBar) {
-            let currentClicked = isHoveringOsBar;
-            console.log(currentClicked)
-            
-            let newElement = document.createElement("li");
-            let newLink = document.createElement("a");
-            newLink.innerHTML = "Close Window";
-            newLink.onclick = () => {
-              console.log(currentClicked)
-              closeWindow(currentClicked)
-            };
-            newElement.append(newLink);
-            newElement.id = "close-window";
-            menu.children[0].appendChild(newElement);
-          }
-          e.preventDefault();
-          document.addEventListener("click", function(){
-            menu.style.display = "none";
-            if(document.getElementById("close-window")){
-              document.getElementById("close-window").remove();
-            }
-            removeEventListener("click", arguments.callee, false);
-          }, false);
-        }, false);
-      } else {
-        document.attachEvent('oncontextmenu', function() {
-          alert("You've tried to open context menu");
-          window.event.returnValue = false;
-        });
-      }
+
+
+
+
+
+      /* CALL FUNCTIONS FOR SETUP */
+      checkScreenWidthSupported();
+      registerApps();
+      contextMenuSetup();
+      setInterval(updateWindows, 1000);
+      setInterval(updateTime, 1000);
 
 </script>
 
 <style>
     :root{
+      /*Custom cursors*/
       --default-cursor: url(https://i.imgur.com/a3piAm2.png), auto;
       --pointer-cursor: url(https://i.imgur.com/SJ5EbOW.png), auto;
     }
