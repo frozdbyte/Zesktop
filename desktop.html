@@ -361,6 +361,9 @@
       function contextMenuSetup() {
         if (document.addEventListener) {
           document.addEventListener('contextmenu', function(e) {
+            if(document.getElementById("close-window")){
+            	document.getElementById("close-window").remove();
+            }
             const menu = document.getElementById("context-menu");
             menu.style.display = "block";
             menu.style.left = e.pageX + "px";
